@@ -1,0 +1,63 @@
+logging:
+  level:
+    ROOT: INFO
+
+server:
+  port: ${PORT:8081}
+  servlet:
+    context-path: /order-service
+
+spring:
+  application:
+    name: order-service
+  profiles:
+    active: dev
+  datasource:
+    driverClassName: org.postgresql.Driver
+    url: jdbc:postgresql://localhost:5432/db_01?currentSchema=home_broker
+    username: postgres
+    password: 123456
+    test-on-borrow: true
+    validation-query: SELECT 1
+    test-while-idle: true
+    time-between-eviction-runs-millis: 90000
+  jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    database: POSTGRESQL
+    show-sql: false
+    open-in-view: false
+    properties:
+      hibernate:
+        format_sql: true
+        jdbc.batch_size: 50
+        order_inserts: true
+    hibernate:
+      dialect: org.hibernate.dialect.PostgreSQLDialect
+      ddl-auto: 'none'
+
+  kafka:
+    bootstrap-servers: localhost:19092,localhost:29092,localhost:39092
+    max-retry: 3
+    replications: 3
+    default-partitions: 3
+    consumer:
+      auto-offset-reset: earliest
+      enable-auto-commit: false
+      max-poll-records: 500
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+    topics:
+      order:
+        name: ORDER
+      order-dlt:
+        name: ORDER.DLT
+      order-execution:
+        name: ORDER_EXECUTION
+      share:
+        name: SHARE
+app:
+
+

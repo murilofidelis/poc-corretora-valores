@@ -1,0 +1,60 @@
+logging:
+  level:
+    ROOT: INFO
+
+server:
+  port: ${PORT:8080}
+  servlet:
+    context-path: /home-broker-api
+
+spring:
+  application:
+    name: home-broker-api
+  profiles:
+    active: dev
+  datasource:
+    driverClassName: org.postgresql.Driver
+    url: jdbc:postgresql://localhost:5432/db_01?currentSchema=home_broker
+    username: postgres
+    password: 123456
+  jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    database: POSTGRESQL
+    show-sql: false
+    open-in-view: false
+    properties:
+      hibernate:
+        format_sql: true
+        jdbc.batch_size: 50
+        order_inserts: true
+    hibernate:
+      dialect: org.hibernate.dialect.PostgreSQLDialect
+      ddl-auto: 'none'
+
+  kafka:
+    bootstrap-servers: localhost:19092,localhost:29092,localhost:39092
+    max-retry: 3
+    replications: 3
+    default-partitions: 3
+    producer:
+      compression-type: zstd
+      acks: all
+      retries: 3 # Quando maior que zero, permite a repetição de envios com falha.
+      properties:
+        #delivery.timeout.ms: 30000 #30s por quanto tempo deve tentar entregar a mensagem
+        retry.backoff.ms: 5000 #5s  intervalo de repetições
+        enable.idempotence: true
+        spring.json.add.type.headers: false
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+    topics:
+      order:
+        name: ORDER
+      share:
+        name: SHARE
+app:
+
+
+# acks = 0 Se definido como zero, o produtor não aguardará nenhuma confirmação do servidor e o registro será adicionado ao buffer do soquete imediatamente e tratado como enviado.
+# acks = 1 Isso significa que o líder gravará o registro em seu log local, mas não precisará esperar pela confirmação completa de todos os servidores de réplica para responder.
+# acks = all ou -1 Isso significa que o líder aguardará o conjunto completo de réplicas de sincronização para confirmar o registro.
